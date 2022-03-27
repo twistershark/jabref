@@ -1,5 +1,6 @@
 package org.jabref.logic.bst;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.jabref.logic.bst.BibtexCaseChanger.FORMAT_MODE;
@@ -145,4 +146,43 @@ public class BibtexCaseChangersTest {
         // assertCaseChangerTitleUppers("{What ABOUT thIS} one?", "{What ABOUT thIS} one?");
         // assertCaseChangerTitleUppers("{And {thIS} might {a{lso}} be possible}", "{And {thIS} might {a{lso}} be possible}")
     }
+
+    private static Stream<Arguments> provideSpecialChars() {
+        return Stream.of(
+                Arguments.of("oe", new char[]{'a', 'b', 'o', 'e', 'f'}, 2),
+
+                Arguments.of("OE", new char[]{'O', 'E', 'c'}, 0),
+
+                Arguments.of("ae", new char[]{'O', 'E', 'a', 'e'}, 2),
+
+                Arguments.of("AE", new char[]{'O', 'A', 'E', 'e'}, 1),
+
+                Arguments.of("ss", new char[]{'O', 'E', 's', 's'}, 2),
+
+                Arguments.of("AA", new char[]{'O', 'A', 'A', 'e'}, 1),
+
+                Arguments.of("aa", new char[]{'O', 'E', 'a', 'a'}, 2)
+
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideSpecialChars")
+    public void testFindSpecialChars(String expected, char[] source, Integer pos) {
+        // checks if special char is found in method conditions
+        assertEquals(expected, BibtexCaseChanger.findSpecialChar(source, pos).get());
+    }
+
+    @Test
+    public void testFindSpecialCharsIsPresentInString() {
+        // checks if the char is present in "ijoOlL"
+        assertEquals("i" ,BibtexCaseChanger.findSpecialChar(new char[] {'i'}, 0).get());
+    }
+
+    @Test
+    public void testFindSpecialCharsEmpty() {
+        // checks if no special char is found
+        assertEquals(true ,BibtexCaseChanger.findSpecialChar(new char[] {'a'}, 0).isEmpty());
+    }
+
 }
